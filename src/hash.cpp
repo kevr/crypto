@@ -160,22 +160,21 @@ void print<std::array<uchar,64>>(std::array<uchar,64>& t, const char *msg)
 int main(int argc, char *argv[])
 {
     if(argc != 2) {
-        cerr << "usage: " << argv[0] << " 'passphrase'" << endl;
+        cerr << "usage: " << argv[0] << " passphrase" << endl;
         return 1;
     }
 
-    // our std::array to copy to context
+    // our std::array of 64 bytes of input data
     array<uchar, 64> data;
 
     uint32_t len = strlen(argv[1]);
-    uint32_t i = 0; // a reused loop variable
+    uint32_t i = 0;
 
     // copy argv[1] into leading bits
-    *(argv[1] + len) = 0x80;
     memcpy(&data[0], argv[1], strlen(argv[1]));
-    //data[len] = 0x80;
+    data[len] = 0x80;
 
-    // Zero all bits
+    // Zero all trailing bits
     for(i = len + 1; i < 63; ++i)
         data[i] = 0x00;
     data[i] = (len << 3); // then add our bit length to the end
@@ -187,14 +186,11 @@ int main(int argc, char *argv[])
 
     // Message Schedule Array, size 64 initialized all to 0x00
     vector<uint32_t> sd(64, 0x00);
-    uchar *p = nullptr;
 
-    // copy over data to first 64 bytes
+    // copy over data to first 64 bytes and build message schedule
     transform(ctx, sd);
 
     print(sd, "\nPrinting Message Schedule Array");
-
-    // now time to build message schedule array and hash
 
     vector<uchar> hash(32, 0x00);
 
