@@ -1,0 +1,9 @@
+
+.*.swp
+*.o
+.*.pyc
+.*.py
+bin/
+obj/
+lib/
+
