@@ -2,7 +2,7 @@
 * Project: hash
 * Author: kevr <kevr@nixcode.us>
 * License: MIT
-* Description: Hashing program
+* Description: SHA2 hashing program.
 */
 #include <type_traits>
 #include <utility>
@@ -19,7 +19,7 @@ typedef unsigned char uchar;
 
 struct SHA256_CTX
 {
-    array<uchar, 64>   data;
+    array<uchar,   64> data;
     array<uint32_t, 8> hash;
 
     template<size_t N>
@@ -56,6 +56,11 @@ static const uint32_t key[64] = {
     0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
+uint32_t to_little_endian(uchar& a, uchar& b, uchar& c, uchar& d)
+{
+    return ((a << 24) | (b << 16) | (c << 8) | (d));
+}
+
 template<typename T>
 T rotate(const T& x, const int& n)
 {
@@ -67,13 +72,13 @@ void transform(SHA256_CTX& ctx, vector<uint32_t>& w)
     uint32_t s0, s1;
 
     for(uint32_t i = 0, j = 0; i < 16; ++i, j += 4) {
-        w[i] = (ctx.data[j] << 24) | (ctx.data[j+1] << 16)
-             | (ctx.data[j+2] << 8) | (ctx.data[j+3]);
+        w[i] = to_little_endian(ctx.data[j], ctx.data[j+1],
+                                ctx.data[j+2], ctx.data[j+3]);
     }
 
     for(uint32_t i = 16; i < 64; ++i) {
         s0 = (rotate(w[i-15], 7)) ^ (rotate(w[i-15], 18)) ^ (w[i-15] >> 3);
-        s1 = (rotate(w[i-2], 17)) ^ (rotate(w[i-2], 19)) ^ ((w[i-2] >> 10));
+        s1 = (rotate(w[i-2], 17)) ^ (rotate(w[i-2], 19)) ^ (w[i-2] >> 10);
         w[i] = w[i-16] + s0 + w[i-7] + s1;
     }
 
@@ -91,11 +96,11 @@ void transform(SHA256_CTX& ctx, vector<uint32_t>& w)
     uint32_t ch, maj, t1, t2;
 
     for(uint32_t i = 0; i < 64; ++i) {
-        s1 = rotate(e, 6) ^ rotate(e, 11) ^ rotate(e, 25);
+        s1 = (rotate(e, 6)) ^ (rotate(e, 11)) ^ (rotate(e, 25));
         ch = (e & f) ^ (~(e) & g);
         t1 = h + s1 + ch + key[i] + w[i];
 
-        s0 = rotate(a, 2) ^ rotate(a, 13) ^ rotate(a, 22);
+        s0 = (rotate(a, 2)) ^ (rotate(a, 13)) ^ (rotate(a, 22));
         maj = (a & b) ^ (a & c) ^ (b & c);
         t2 = s0 + maj;
 
