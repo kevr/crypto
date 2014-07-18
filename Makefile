@@ -2,7 +2,7 @@
 CXXFLAGS+=-std=c++11
 
 # objects
-obj = bitmanip.o hash.o
+obj = hash.o byte.o sha2.o
 
 # Set make paths
 BASE=$(shell pwd)

@@ -1,5 +1,5 @@
 crypto
 ======
 
-Some fun with elemenetary cryptography.
+This project is a collection of 
 
